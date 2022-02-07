@@ -1,0 +1,149 @@
+---
+title: "Conkling, PUBPOL 543; Deliverable 2: Bivariate Plot"
+output: html_notebook
+---
+
+#Load College Scorecard
+```{r}
+#Load College Scorecard
+library(readxl)
+college_scorecard_19_20 <- read.csv("https://raw.githubusercontent.com/tconkling47/543_deliverable_2/main/college_scorecard_19-20.csv")
+```
+
+
+#Load Tidyverse
+```{r}
+library(tidyverse)
+```
+
+## Create new dataset with detailed college type variables and select the variables I want.
+```{r}
+collegetypes <- college_scorecard_19_20 %>%
+  mutate(
+    type = case_when(CONTROL==1    ~ 'Public'
+                     ,CONTROL==2 & RELAFFIL=='NULL' ~ 'Non-Profit'
+                     , CONTROL==2 & RELAFFIL!='NULL'      ~ 'Religious'
+                     , CONTROL==3     ~ 'For-Profit')
+  ) %>%
+  select(UNITID, INSTNM, type)
+```
+
+##Load Debt Dataset
+```{r}
+#Load College Scorecard
+library(readxl)
+recent_cohort_field_of_study <- read.excel("https://raw.githubusercontent.com/tconkling47/543_deliverable_2/main/recent_cohort_field_of_study.xlsx")
+```
+
+##filter only bachelors degrees and select the variables we want from the debt dataset
+```{r}
+debt_pre_merge <- recent_cohort_field_of_study %>%
+  filter(CREDLEV==3) %>%
+  select(UNITID, INSTNM, CIPCODE, CIPDESC, CREDLEV, CREDDESC, DEBT_ALL_STGP_ANY_N, DEBT_ALL_STGP_ANY_MEAN)
+```
+ 
+##filter out any degrees that do not have the number AND mean debt in each program
+```{r}
+data1 <- debt_pre_merge %>%
+  filter(DEBT_ALL_STGP_ANY_N != 'PrivacySuppressed' 
+         & DEBT_ALL_STGP_ANY_MEAN != 'PrivacySuppressed')
+```
+
+### transform variables into numeric variables
+```{r}
+data2 <- transform(data1, DEBT_ALL_STGP_ANY_N = as.numeric(DEBT_ALL_STGP_ANY_N),
+                    DEBT_ALL_STGP_ANY_MEAN = as.numeric(DEBT_ALL_STGP_ANY_MEAN))
+```
+
+### create total debt column
+```{r}
+data3 <- data2 %>%
+  mutate(total_debt = DEBT_ALL_STGP_ANY_N*DEBT_ALL_STGP_ANY_MEAN)
+```
+
+### create pivot table to get average student debt per school
+```{r}
+data4 <- data3 %>%
+  group_by(UNITID) %>%
+  summarise(total_students_in_school_sample = sum(DEBT_ALL_STGP_ANY_N),
+            total_debt_in_school_sample = sum(total_debt)) %>%
+  mutate(school_average_student_debt = total_debt_in_school_sample/total_students_in_school_sample)
+```
+
+## merge our two datasets
+```{r}
+data5 <- merge(data4, collegetypes, by="UNITID")
+```
+
+
+```{r boxNumCat1, eval=TRUE}
+
+library(ggplot2)
+base=ggplot(data=data5,
+            aes(x=type,y=school_average_student_debt))
+
+base + geom_boxplot() + coord_flip()
+```
+
+reorder the category by the median of the numeric variable:
+```{r, eval=TRUE}
+base2=ggplot(data=data5,
+            aes(x=reorder(type,
+                          school_average_student_debt,
+                          median),
+                y=school_average_student_debt)) 
+boxplot_2 = base2 + geom_boxplot()
+# flipping
+boxplot_3 = boxplot_2  + coord_flip()
+boxplot_3
+```
+
+```{r}
+### Adding title and source
+titleText="Distribution of Average BA Degree Student Debt at U.S. Colleges, by Institution Type"
+sourceText='Source: US Department of Education'
+boxplot_4 = boxplot_3 + labs(title=titleText,
+                   x='Institution Type',
+                   y= "Average Student Debt of Bachelor's Degree Graduate",
+                   caption = sourceText) + theme_classic()
+boxplot_4
+```
+
+
+
+labs(title = "Distribution of Average Student Debt at U.S. Colleges, by Institution Type ")
+
+```{r}
+#load scales
+library(scales)
+```
+
+###Reposition Title and Source Text, customize axis
+```{r}
+boxplot_5 = boxplot_4 + theme(plot.caption = element_text(hjust = 0),
+                    plot.title = element_text(hjust = 0
+                                              ))
+boxplot_5
+```
+
+```{r}
+boxplot_6 = boxplot_5 + scale_y_continuous(labels=scales::dollar_format())
+boxplot_6
+```
+
+```{r}
+boxplot7 = boxplot_6 + theme(
+    plot.title = element_text(face = 'bold', size = 14, hjust=1.1, vjust = 1), 
+    axis.title = element_text(face = 'bold'),
+    axis.title.y = element_text(vjust = 2.5),
+    axis.title.x = element_text(vjust = 0)
+  ) 
+boxplot7
+```
+
+```{r}
+#export image
+boxplot7
+ggsave('Conkling_Bivariate_Cat-Numerical_Graph_PUBPOL543.jpg', device = 'jpeg', width = 8, height = 5, dpi = 300)
+```
+
