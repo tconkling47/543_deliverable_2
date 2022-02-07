@@ -32,7 +32,10 @@ collegetypes <- college_scorecard_19_20 %>%
 ```{r}
 #Load College Scorecard
 library(readxl)
-recent_cohort_field_of_study <- read.excel("https://raw.githubusercontent.com/tconkling47/543_deliverable_2/main/recent_cohort_field_of_study.xlsx")
+url <- "https://raw.githubusercontent.com/tconkling47/543_deliverable_2/main/recent_cohort_field_of_study.xlsx"
+destfile <- "recent_cohort_field_of_study.xlsx"
+curl::curl_download(url, destfile)
+recent_cohort_field_of_study <- read_excel(destfile)
 ```
 
 ##filter only bachelors degrees and select the variables we want from the debt dataset
