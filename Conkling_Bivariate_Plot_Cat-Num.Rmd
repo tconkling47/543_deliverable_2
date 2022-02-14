@@ -103,18 +103,17 @@ boxplot_3
 
 ```{r}
 ### Adding title and source
-titleText="Distribution of Average BA Degree Student Debt at U.S. Colleges, by Institution Type"
+titleText="Public Colleges & Universities Leave Bachelor's Degree Graduates with"
+subtitleText="Less Student Debt Than Other Types of Institutions"
 sourceText='Source: US Department of Education'
 boxplot_4 = boxplot_3 + labs(title=titleText,
+                             subtitle = subtitleText,
                    x='Institution Type',
                    y= "Average Student Debt of Bachelor's Degree Graduate",
                    caption = sourceText) + theme_classic()
 boxplot_4
 ```
 
-
-
-labs(title = "Distribution of Average Student Debt at U.S. Colleges, by Institution Type ")
 
 ```{r}
 #load scales
@@ -123,9 +122,7 @@ library(scales)
 
 ###Reposition Title and Source Text, customize axis
 ```{r}
-boxplot_5 = boxplot_4 + theme(plot.caption = element_text(hjust = 0),
-                    plot.title = element_text(hjust = 0
-                                              ))
+boxplot_5 = boxplot_4 + theme(plot.caption = element_text(hjust = 0))
 boxplot_5
 ```
 
@@ -136,17 +133,51 @@ boxplot_6
 
 ```{r}
 boxplot7 = boxplot_6 + theme(
-    plot.title = element_text(face = 'bold', size = 14, hjust=1.1, vjust = 1), 
+    plot.title = element_text(face = 'bold', size = 15, hjust=0.3, vjust = 0),
+    plot.subtitle = element_text(face = 'bold', size = 15, hjust=0.4, vjust=0),
     axis.title = element_text(face = 'bold'),
     axis.title.y = element_text(vjust = 2.5),
     axis.title.x = element_text(vjust = 0)
   ) 
 boxplot7
 ```
+```{r}
+library(grid)
+```
+
+
+```{r}
+grob <- grobTree(textGrob("e.g. Ivy League, Small Liberal Arts Colleges", x=0.6,  y=0.34, hjust=0,
+  gp=gpar(col="black", fontsize=11, fontface="italic")))
+boxplot8 = boxplot7 + annotation_custom(grob)
+boxplot8
+```
+
+```{r}
+grob2 <- grobTree(textGrob("e.g. University of Washington, Ohio State ", x=0.55,  y=0.1, hjust=0,
+  gp=gpar(col="black", fontsize=11, fontface="italic")))
+boxplot9 = boxplot8 + annotation_custom(grob2)
+boxplot9
+```
+
+```{r}
+grob3 <- grobTree(textGrob("e.g. Notre Dame, BYU", x=0.72,  y=0.58, hjust=0,
+  gp=gpar(col="black", fontsize=11, fontface="italic")))
+boxplot10 = boxplot9 + annotation_custom(grob3)
+boxplot10
+```
+
+```{r}
+grob4 <- grobTree(textGrob("e.g. Univ. of Phoenix", x=0.8,  y=0.82, hjust=0,
+  gp=gpar(col="black", fontsize=11, fontface="italic")))
+boxplot11 = boxplot10 + annotation_custom(grob4)
+boxplot11
+```
+
 
 ```{r}
 #export image
-boxplot7
-ggsave('Conkling_Bivariate_Cat-Numerical_Graph_PUBPOL543.jpg', device = 'jpeg', width = 8, height = 5, dpi = 300)
+boxplot11
+ggsave('Conkling_Deliverable_2.jpg', device = 'jpeg', width = 9, height = 5, dpi = 300)
 ```
 

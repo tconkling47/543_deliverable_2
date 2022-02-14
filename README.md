@@ -10,6 +10,8 @@ The distribution of this value is broken down by postsecondary institution types
 -Non-Profit
 -Public
 
+Please see the .jpg file to see the plot as it was meant to be seen. The preview shown in the .rmd or .html file cuts off the right side of the bivariate plot.
+
 Please let me know if you have any questions or concerns.
 
 Tommy Conkling
